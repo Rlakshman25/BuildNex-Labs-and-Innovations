@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BuildNex Labs | Advanced Simulation Sandbox Node</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        /* ==========================================================================
+           1. CORE INDEPENDENT WORKSPACE COLOR REGISTERS
+           ========================================================================== */
+        :root {
+            --bg-base: #0b0c10;
+            --bg-panel: #1f2833;
+            --neon-amber: #f97316;
+            --neon-glow: #ea580c;
+            --text-bright: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-line: rgba(249, 115, 22, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-base);
+            color: var(--text-bright);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 8%;
+            background: #0b0c10;
+            border-bottom: 1px solid var(--border-line);
+        }
+
+        .logo h1 { font-size: 20px; font-weight: 700; color: #fff; }
+        .logo h1 span { color: var(--neon-amber); }
+        .back-btn { text-decoration: none; color: var(--neon-amber); font-size: 13px; font-weight: 600; border: 1px solid rgba(249, 115, 22, 0.3); padding: 8px 18px; border-radius: 50px; transition: 0.3s; }
+        .back-btn:hover { background: rgba(249, 115, 22, 0.05); }
+
+        wrapper { display: block; padding: 60px 8%; }
+
+        .panel-title-block { margin-bottom: 40px; border-left: 3px solid var(--neon-amber); padding-left: 15px; }
+        .panel-title-block h2 { font-size: 28px; font-weight: 800; text-transform: uppercase; }
+        .panel-title-block p { color: var(--neon-amber); font-size: 11px; text-transform: uppercase; letter-spacing: 2px; }
+
+        .utility-widget {
+            background: rgba(31, 40, 51, 0.6);
+            border: 1px solid var(--border-line);
+            border-radius: 24px;
+            padding: 40px;
+            margin-bottom: 40px;
+        }
+
+        .widget-select {
+            padding: 14px 24px; background: #0b0c10; color: white;
+            border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 10px;
+            outline: none; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif;
+        }
+        .widget-select:focus { border-color: var(--neon-amber); }
+
+        .workspace-split { display: grid; grid-template-columns: 0.9fr 1.1fr; gap: 30px; margin-top: 20px; }
+        @media(max-width: 850px) { .workspace-split { grid-template-columns: 1fr; } }
+
+        .sidebar-menu { display: flex; flex-direction: column; gap: 12px; }
+        .tab-node {
+            background: rgba(11, 12, 16, 0.6); padding: 18px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.04);
+            cursor: pointer; transition: all 0.2s ease; text-align: left;
+        }
+        .tab-node:hover, .tab-node.active { border-color: var(--neon-amber); background: rgba(249, 115, 22, 0.05); }
+        .tab-node h4 { font-size: 15px; font-weight: 700; margin-bottom: 4px; color: #fff; }
+        .tab-node p { color: var(--text-muted); font-size: 12px; }
+
+        .pinout-display { background: #0b0c10; border-radius: 15px; padding: 25px; border: 1px solid rgba(255, 255, 255, 0.05); margin-bottom: 20px; }
+        .pin-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.05); font-size: 14px; }
+        .pin-row:last-child { border-bottom: none; }
+        .pin-label { color: var(--neon-amber); font-weight: 600; }
+        .pin-target { color: #cbd5e1; text-align: right; }
+
+        .compiler-block {
+            background: #020205; border-radius: 12px; padding: 20px; border: 1px solid rgba(249, 115, 22, 0.1);
+            font-family: 'Courier New', Courier, monospace; font-size: 13px; color: #fed7aa; overflow-x: auto; white-space: pre;
+        }
+
+        .btn { padding: 12px 28px; border: none; border-radius: 50px; cursor: pointer; font-weight: 700; font-size: 13px; font-family: 'Inter', sans-serif; transition: 0.3s; }
+        .btn-primary { background: linear-gradient(90deg, var(--neon-amber), var(--neon-glow)); color: #0b0c10; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(249,115,22,0.3); }
+        .btn-secondary { background: transparent; border: 1px solid rgba(249,115,22,0.3); color: #fff; }
+        .btn-secondary:hover { border-color: var(--neon-amber); color: var(--neon-amber); }
+    </style>
+</head>
+
+<body>
+
+    <nav>
+        <div class="logo">
+            <h1>BUILD<span>NEX</span> CORES</h1>
+        </div>
+        <a href="index.html" class="back-btn">📋 Return to Corporate Overview</a>
+    </nav>
+
+    <wrapper>
+        <div class="panel-title-block">
+            <h2>01 / Hardware Communications & Bus Analyzer Matrix</h2>
+            <p>Physical Connection Register Handshaking</p>
+        </div>
+
+        <div class="utility-widget">
+            <div class="widget-controls" style="display:flex; gap:15px; margin-bottom:20px; flex-wrap:wrap;">
+                <select class="widget-select" id="sensorSelect" onchange="updatePinoutMapping()">
+                    <option value="max30102">MAX30102 Biometric Pulse Oximeter Sensor</option>
+                    <option value="mpu6050">MPU6050 6-Axis Accelerometer/Gyroscope IMU</option>
+                </select>
+                <select class="widget-select" id="mcuSelect" onchange="updatePinoutMapping()">
+                    <option value="esp32">ESP32 Dual-Core DevKit SoC Platform</option>
+                    <option value="arduino">Arduino Uno R3 Microcontroller Board</option>
+                </select>
+            </div>
+
+            <div class="pinout-display" id="pinoutMatrixOutputBlock"></div>
+
+            <h4 style="font-size:14px; color:#e11d48; margin-top:25px; margin-bottom:12px; font-weight:700;">
+                🎛️ Real-Time Bus Protocol Logic Analyzer Oscilloscope Simulation
+            </h4>
+            <div style="background:#020205; border-radius:12px; padding:20px; border:1px solid rgba(225,29,72,0.15); margin-bottom:25px;">
+                <canvas id="logicAnalyzerCanvas" width="700" height="140" style="width:100%; background:#05050a; border-radius:8px; border:1px solid rgba(255,255,255,0.03);"></canvas>
+                <div style="display:flex; justify-content:space-between; margin-top:10px; font-family:monospace; font-size:11px; color:#64748b;">
+                    <span>START ──► [ ADDR FRAME ] ──► [ R/W ] ──► [ ACK ] ──► [ REGISTER DATA ] ──► STOP</span>
+                    <span style="color:#e11d48;" id="busTargetAddressDisplay">ADDR / MODE: 0x00</span>
+                </div>
+            </div>
+
+            <h4 style="font-size:14px; color:var(--neon-amber); margin-bottom:10px; font-weight:700;">⚙️ Generated Firmware Initialization Boilerplate</h4>
+            <div class="compiler-block" id="firmwareCompilerCodeBlock"></div>
+        </div>
+
+        <div class="panel-title-block">
+            <h2>02 / Smart Home Mesh & Smart BMS Automation Terminal</h2>
+            <p>MQTT Network Serialization Packets</p>
+        </div>
+
+        <div class="utility-widget" style="border-color:#06b6d4; background:rgba(6,182,212,0.02);">
+            <div class="workspace-split">
+                <div class="sidebar-menu" id="homeObjectSelectorContainer">
+                    <div class="tab-node active" onclick="executeAutomationConsoleCompilation('smart_bms', this)">
+                        <h4>🔋 Smart LiFePO4 BMS Battery Pack</h4>
+                        <p>Evaluates individual cell registers and internal balance limits continuously.</p>
+                    </div>
+                    <div class="tab-node" onclick="executeAutomationConsoleCompilation('hvac_ahu', this)">
+                        <h4>🏢 Proportional HVAC Chilled Water Loop</h4>
+                        <p>Runs internal P-algorithms to balance cooling output valve percentages.</p>
+                    </div>
+                    <div class="tab-node" onclick="executeAutomationConsoleCompilation('smart_relay', this)">
+                        <h4>💡 Living Room Lighting Mesh Array</h4>
+                        <p>Traces Zigbee signal parameters and current load draws across lighting grids.</p>
+                    </div>
+                </div>
+
+                <div style="background:#020205; border:1px solid rgba(6,182,212,0.2); border-radius:16px; padding:25px; display:flex; flex-direction:column; justify-content:space-between;">
+                    <div class="pinout-display" id="automationDevicePropertiesDisplayBlock" style="margin-bottom:15px; border-color:rgba(255,255,255,0.03);"></div>
+                    <div>
+                        <h4 style="font-size:12px; color:#06b6d4; margin-bottom:8px; font-family:monospace;">TRANSMITTED MQTT PACKET FRAME STRING:</h4>
+                        <div class="compiler-block" id="automationProtocolPacketDisplayBlock" style="color:#22d3ee; border-color:rgba(6,182,212,0.15);"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel-title-block">
+            <h2>03 / Embedded TinyML Neural Network Matrix Classifier</h2>
+            <p>Edge Image Array Compilers</p>
+        </div>
+
+        <div class="utility-widget" style="border-color:#a855f7; background:rgba(168,85,247,0.02);">
+            <div style="display:flex; gap:30px; flex-wrap:wrap; align-items:flex-start;">
+                <div>
+                    <canvas id="tinymlCanvas" width="160" height="160" style="background:#020205; border:2px dashed #a855f7; border-radius:12px; cursor:crosshair; position:static; display:block;"></canvas>
+                    <div style="display:flex; gap:10px; margin-top:12px;">
+                        <button class="btn btn-secondary" style="border-color:#a855f7; color:#a855f7; padding:8px 16px; font-size:12px; border-radius:4px;" onclick="clearTinyMLCanvas()">Reset Board</button>
+                        <button class="btn btn-primary" style="background:linear-gradient(90deg, #a855f7, #6366f1); color:white; padding:8px 16px; font-size:12px; border-radius:4px;" onclick="executeEdgeInference()">Compute Inference</button>
+                    </div>
+                </div>
+                <div style="flex:1; min-width:280px; background:#0b0c10; border-radius:12px; padding:20px; border:1px solid rgba(255,255,255,0.05);">
+                    <h4 style="font-size:14px; color:#a855f7; margin-bottom:12px;">⚡ Hardware Logic Evaluation Array Mappings</h4>
+                    <p style="font-size:13px; font-family:monospace; margin-bottom:6px;" id="mlClassResult">Predicted Class: STANDBY</p>
+                    <p style="font-size:13px; font-family:monospace; margin-bottom:15px; color:#64748b;" id="mlConfidence">Inference Certainty: 0.00%</p>
+                    <h4 style="font-size:13px; color:#6366f1; margin-bottom:8px; font-weight:700;">💾 Export C++ Structural Ingestion Matrix</h4>
+                    <div class="compiler-block" id="cppMatrixOutputBlock" style="color:#c084fc; max-height:120px; font-size:11px; border-color:rgba(168,85,247,0.15);">// Draw on the screen grid to extract vectors...</div>
+                </div>
+            </div>
+        </div>
+    </wrapper>
+
+    <script>
+        /* REGISTER PIN ASSIGNMENT BLUEPRINTS */
+        const pinoutDatabase = {
+            max30102: {
+                esp32: [{ pin: "VCC", target: "3.3V Power Vector Rail Input" }, { pin: "GND", target: "Common Ground Reference Plane" }, { pin: "SDA", target: "GPIO 21 (Dedicated I2C Data Node)" }, { pin: "SCL", target: "GPIO 22 (Dedicated I2C Clock Node)" }, { pin: "INT", target: "GPIO 19 (Hardware Interrupt pin)" }],
+                arduino: [{ pin: "VCC", target: "5V Input Pin Layer (Level Shifter Required)" }, { pin: "GND", target: "GND Ground Bus Return" }, { pin: "SDA", target: "Analog Input Pin A4 (I2C Data)" }, { pin: "SCL", target: "Analog Input Pin A5 (I2C Clock)" }]
+            },
+            mpu6050: {
+                esp32: [{ pin: "VCC", target: "3.3V Power Pin Array" }, { pin: "GND", target: "Common System Ground Plane Link" }, { pin: "SDA", target: "GPIO 21 (I2C Data Bus Line)" }, { pin: "SCL", target: "GPIO 22 (I2C Clock Bus Line)" }],
+                arduino: [{ pin: "VCC", target: "5V Main Power Input Pin" }, { pin: "GND", target: "GND Return Rail" }, { pin: "SDA", target: "Analog Input Pin A4 (Direct I2C Data Node)" }, { pin: "SCL", target: "Analog Input Pin A5 (Direct I2C Clock Node)" }]
+            }
+        };
+
+        const firmwareBoilerplateDatabase = {
+            max30102: `#include <Wire.h>\n#include "MAX30105.h"\nMAX30105 particleSensor;\n\nvoid setup() {\n  Wire.begin();\n  if (!particleSensor.begin(Wire, I2C_SPEED_FAST)) {\n    while(1); // Halt on Peripheral Comm Error\n  }\n  particleSensor.setup();\n}`,
+            mpu6050: `#include <Adafruit_MPU6050.h>\n#include <Adafruit_Sensor.h>\n#include <Wire.h>\nAdafruit_MPU6050 mpu;\n\nvoid setup() {\n  Wire.begin();\n  if (!mpu.begin()) {\n    while(1); // Lock Core on Fault\n  }\n  mpu.setAccelerometerRange(MPU6050_RANGE_8_G);\n}`
+        };
+
+        const busAddresses = { max30102: "0x57", mpu6050: "0x68" };
+
+        function updatePinoutMapping() {
+            const sensor = document.getElementById("sensorSelect").value;
+            const mcu = document.getElementById("mcuSelect").value;
+            const selectedMapping = pinoutDatabase[sensor]?.[mcu];
+            const outputBlock = document.getElementById("pinoutMatrixOutputBlock");
+            
+            outputBlock.innerHTML = "";
+            if(!selectedMapping) return;
+
+            selectedMapping.forEach(row => {
+                outputBlock.innerHTML += `<div class="pin-row"><span class="pin-label">${row.pin}</span><span class="pin-target">→ &nbsp; ${row.target}</span></div>`;
+            });
+            document.getElementById("firmwareCompilerCodeBlock").innerText = firmwareBoilerplateDatabase[sensor];
+            renderBusLogicWaveform(sensor);
+        }
+
+        function renderBusLogicWaveform(sensorId) {
+            const canvas = document.getElementById("logicAnalyzerCanvas"); if (!canvas) return;
+            const ctx = canvas.getContext("2d");
+            document.getElementById("busTargetAddressDisplay").innerText = `ADDR MODE: ${busAddresses[sensorId]}`;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            const sclY = 45; const sdaY = 95; const waveStep = 22; let currentX = 40;
+            ctx.lineWidth = 2; ctx.font = "10px monospace"; ctx.strokeStyle = "var(--neon-amber)"; ctx.fillStyle = "var(--neon-amber)";
+            ctx.fillText("SCL (Clock)", 10, sclY - 15); ctx.beginPath(); ctx.moveTo(0, sclY - 20);
+
+            for (let i = 0; i < 24; i++) {
+                ctx.lineTo(currentX, sclY); currentX += waveStep / 2; ctx.lineTo(currentX, sclY);
+                ctx.lineTo(currentX, sclY - 20); currentX += waveStep / 2; ctx.lineTo(currentX, sclY - 20);
+            }
+            ctx.stroke();
+
+            currentX = 40; ctx.strokeStyle = "#10b981"; ctx.fillStyle = "#10b981";
+            ctx.fillText("SDA (Data Matrix)", 10, sdaY - 15); ctx.beginPath(); ctx.moveTo(0, sdaY - 20);
+            let mockBits = [1, 1, 0, 1, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 0, 1, 1, 0];
+            mockBits.forEach(bit => {
+                let targetHeight = bit === 1 ? (sdaY - 20) : sdaY;
+                ctx.lineTo(currentX, targetHeight); ctx.lineTo(currentX + waveStep, targetHeight); currentX += waveStep;
+            });
+            ctx.stroke();
+        }
+
+        /* PACKET SERIALIZATION SIM DATABASE */
+        const automationDatabase = {
+            smart_bms: {
+                title: "Smart LiFePO4 Energy Storage Pack System", protocol: "Modbus RTU over RS-485", link: "UART Lines @ 9600 Baud", topic: "home/power/bms",
+                json: '{\n  "battery_voltage_v": 53.24,\n  "current_amps": -12.40,\n  "state_of_charge_pct": 84.50,\n  "highest_cell_v": 3.332,\n  "lowest_cell_v": 3.321,\n  "balancing_active": true\n}'
+            },
+            hvac_ahu: {
+                title: "Proportional AHU Chilled Water Valve Loop Controller", protocol: "BACnet/IP Native Objects", link: "UDP Network Layer (Port 47808)", topic: "facility/ahu/cooling_loop",
+                json: '{\n  "discharge_air_temp_c": 12.40,\n  "cooling_setpoint_c": 22.00,\n  "valve_proportional_output_pct": 30.00,\n  "system_error_vector": 2.00\n}'
+            },
+            smart_relay: {
+                title: "Living Room Lighting Main Latch Relay Node", protocol: "Zigbee Mesh Automation Network", link: "Mesh Health -> LQI: 142 (Stable)", topic: "home/livingroom/switch1",
+                json: '{\n  "relay_latch_state": "ON",\n  "monitored_power_watts": 14.20\n}'
+            }
+        };
+
+        function executeAutomationConsoleCompilation(key, tabElement) {
+            document.querySelectorAll(".tab-node").forEach(node => node.classList.remove("active"));
+            tabElement.classList.add("active");
+            const fields = automationDatabase[key];
+            document.getElementById("automationDevicePropertiesDisplayBlock").innerHTML = `
+                <div class="pin-row"><span class="pin-label">Device Designation</span><span class="pin-target">${fields.title}</span></div>
+                <div class="pin-row"><span class="pin-label">Industrial Protocol</span><span class="pin-target">${fields.protocol}</span></div>
+                <div class="pin-row"><span class="pin-label">Signal Interface Path</span><span class="pin-target" style="font-weight:700; color:#fff;">${fields.link}</span></div>
+            `;
+            document.getElementById("automationProtocolPacketDisplayBlock").innerText = `PUBLISH\nTopic   : ${fields.topic}\nPayload :\n${fields.json}`;
+        }
+
+        /* TINYML DRAW PANEL ENGINE */
+        const tCanvas = document.getElementById("tinymlCanvas"); const tCtx = tCanvas.getContext("2d"); let isDrawingTinyML = false;
+        tCtx.strokeStyle = "#ffffff"; tCtx.lineWidth = 10; tCtx.lineCap = "round";
+        tCanvas.addEventListener("mousedown", (e) => { isDrawingTinyML = true; drawTinyMLNode(e); });
+        tCanvas.addEventListener("mousemove", drawTinyMLNode);
+        window.addEventListener("mouseup", () => isDrawingTinyML = false);
+
+        function drawTinyMLNode(e) {
+            if (!isDrawingTinyML) return; const rect = tCanvas.getBoundingClientRect();
+            tCtx.lineTo(e.clientX - rect.left, e.clientY - rect.top); tCtx.stroke(); tCtx.beginPath(); tCtx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+        }
+        function clearTinyMLCanvas() {
+            tCtx.clearRect(0, 0, tCanvas.width, tCanvas.height); tCtx.beginPath();
+            document.getElementById("mlClassResult").innerText = "Predicted Class: STANDBY";
+            document.getElementById("mlConfidence").innerText = "Inference Certainty: 0.00%";
+            document.getElementById("cppMatrixOutputBlock").innerText = "// Awaiting grid inputs...";
+        }
+        function executeEdgeInference() {
+            const tempImg = tCtx.getImageData(0, 0, tCanvas.width, tCanvas.height); let gridData = [];
+            for (let y = 0; y < 160; y += 10) { for (let x = 0; x < 160; x += 10) { gridData.push(parseFloat((tempImg.data[(y * 160 + x) * 4 + 3] / 255).toFixed(2))); } }
+            let strokeSum = gridData.reduce((a, b) => a + b, 0); if (strokeSum === 0) { alert("Draw a pattern configuration input first."); return; }
+            document.getElementById("mlClassResult").innerHTML = `Predicted Class: <strong style="color:#a855f7;">Complex Wave Vector</strong>`;
+            document.getElementById("mlConfidence").innerText = `Inference Certainty: ${(78 + Math.random()*18).toFixed(2)}%`;
+            let cppCode = `const float gesture_input_matrix[256] = {\n  `;
+            for (let i = 0; i < gridData.length; i++) { cppCode += gridData[i] + (i === gridData.length - 1 ? "" : ", "); if ((i + 1) % 16 === 0 && i !== gridData.length - 1) cppCode += "\n  "; }
+            document.getElementById("cppMatrixOutputBlock").innerText = cppCode + "\n};";
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            updatePinoutMapping();
+            executeAutomationConsoleCompilation('smart_bms', document.querySelector(".tab-node"));
+        });
+    </script>
+</body>
+
+</html>
