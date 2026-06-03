@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BuildNex Labs | Systems Prototyping & B2B Automation Engineering</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        /* ==========================================================================
+           1. MODERN COPPERSMITH INDUSTRIAL STYLE & VARIABLES
+           ========================================================================== */
+        :root {
+            --bg-base: #0b0c10;
+            --bg-panel: #1f2833;
+            --neon-amber: #f97316;
+            --neon-glow: #ea580c;
+            --text-bright: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-line: rgba(249, 115, 22, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-base);
+            color: var(--text-bright);
+            overflow-x: hidden;
+            line-height: 1.7;
+        }
+
+        canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* ==========================================================================
+           2. NAVIGATION BAR
+           ========================================================================== */
+        nav {
+            position: sticky;
+            top: 0;
+            z-index: 999;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 8%;
+            background: rgba(11, 12, 16, 0.95);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border-line);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-emblem {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, var(--neon-glow), var(--neon-amber));
+            border-radius: 10px;
+            font-weight: 800;
+            font-size: 18px;
+            color: #0b0c10;
+            box-shadow: 0 0 15px rgba(249, 115, 22, 0.3);
+        }
+
+        .logo h1 {
+            color: white;
+            font-size: 20px;
+            letter-spacing: 0.5px;
+            font-weight: 700;
+        }
+
+        .logo h1 span { color: var(--neon-amber); }
+
+        .logo p {
+            color: var(--text-muted);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-top: 1px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 25px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #cbd5e1;
+            font-size: 13px;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+
+        .nav-links a:hover { color: var(--neon-amber); }
+
+        .nav-btn-highlight {
+            border: 1px solid var(--neon-amber);
+            padding: 6px 14px;
+            border-radius: 20px;
+            background: rgba(249, 115, 22, 0.05);
+            color: var(--neon-amber) !important;
+        }
+        .nav-btn-highlight:hover {
+            background: rgba(249, 115, 22, 0.15) !important;
+        }
+
+        /* ==========================================================================
+           3. HERO INTRODUCTORY BRIEF
+           ========================================================================== */
+        .hero {
+            min-height: 80vh;
+            display: flex;
+            align-items: center;
+            padding: 0 8%;
+            background: radial-gradient(circle at 85% 50%, rgba(249, 115, 22, 0.04), transparent 45%);
+        }
+
+        .hero-layout {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 40px;
+            align-items: center;
+            width: 100%;
+        }
+
+        @media(max-width: 968px) {
+            .hero-layout { grid-template-columns: 1fr; text-align: center; }
+            .hardware-stage { display: none !important; }
+        }
+
+        .hero-content { max-width: 850px; }
+
+        .hero-tag {
+            color: var(--neon-amber);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: 20px;
+            font-weight: 600;
+            font-size: 12px;
+        }
+
+        .hero h2 {
+            font-size: 52px;
+            line-height: 1.2;
+            margin-bottom: 25px;
+            font-weight: 800;
+            letter-spacing: -1px;
+        }
+
+        .hero h2 span {
+            background: linear-gradient(90deg, var(--neon-amber), #ea580c);
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+
+        .hero-desc {
+            color: #94a3b8;
+            font-size: 17px;
+            line-height: 1.8;
+            margin-bottom: 35px;
+        }
+
+        .hero-action-buttons {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        @media(max-width: 968px) {
+            .hero-action-buttons { justify-content: center; }
+        }
+
+        .hardware-stage {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            perspective: 1200px;
+            height: 350px;
+        }
+
+        .pcb-board {
+            width: 260px;
+            height: 160px;
+            background: rgba(31, 40, 51, 0.4);
+            border: 2px solid var(--neon-amber);
+            border-radius: 14px;
+            transform: rotateX(60deg) rotateZ(-40deg);
+            transform-style: preserve-3d;
+            animation: hardwareFloat 4s ease-in-out infinite;
+            box-shadow: 0 30px 60px rgba(249, 115, 22, 0.15), inset 0 0 25px rgba(249, 115, 22, 0.1);
+        }
+
+        .mcu-silicon {
+            position: absolute; top: 40px; left: 85px; width: 65px; height: 65px; background: #0b0c10; border: 1px dashed #a855f7;
+            transform: translateZ(25px); box-shadow: 0 0 20px rgba(168, 85, 247, 0.4); display: flex; align-items: center; justify-content: center;
+            font-family: monospace; font-size: 8px; color: #a855f7; font-weight: 700;
+        }
+
+        @keyframes hardwareFloat {
+            0% { transform: rotateX(58deg) rotateZ(-38deg) translateY(0px); }
+            50% { transform: rotateX(58deg) rotateZ(-38deg) translateY(-15px); }
+            100% { transform: rotateX(58deg) rotateZ(-38deg) translateY(0px); }
+        }
+
+        /* ==========================================================================
+           4. SCANNABLE CORE GRID STRUCTURES
+           ========================================================================== */
+        section {
+            padding: 90px 8%;
+            position: relative;
+            z-index: 2;
+        }
+
+        .section-header {
+            margin-bottom: 50px;
+            border-left: 3px solid var(--neon-amber);
+            padding-left: 15px;
+        }
+
+        .section-title {
+            font-size: 32px;
+            color: white;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: -0.5px;
+        }
+
+        .section-subtitle {
+            color: var(--neon-amber);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-top: 5px;
+            font-weight: 600;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 30px;
+        }
+
+        .card {
+            background: var(--bg-panel);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: 16px;
+            padding: 35px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .card h3 { font-size: 20px; margin-bottom: 15px; font-weight: 700; border-bottom: 1px solid rgba(249, 115, 22, 0.1); padding-bottom: 10px; }
+        .card p { color: #cbd5e1; line-height: 1.7; font-size: 14px; margin-bottom: 15px; }
+
+        .info-list {
+            list-style: none;
+            margin-top: 15px;
+        }
+
+        .info-list li {
+            font-size: 13.5px;
+            color: #94a3b8;
+            margin-bottom: 10px;
+            padding-left: 18px;
+            position: relative;
+        }
+
+        .info-list li strong { color: #f8fafc; }
+
+        .info-list li::before {
+            content: '▪';
+            position: absolute;
+            left: 0;
+            color: var(--neon-amber);
+        }
+
+        .badge {
+            display: inline-block;
+            background: rgba(249, 115, 22, 0.08);
+            border: 1px solid rgba(249, 115, 22, 0.2);
+            color: var(--neon-amber);
+            font-family: monospace;
+            font-size: 11px;
+            padding: 3px 10px;
+            border-radius: 4px;
+            margin-top: 15px;
+            font-weight: 600;
+            width: fit-content;
+        }
+
+        .service-icon {
+            width: 44px; height: 44px; background: rgba(249, 115, 22, 0.05); border: 1px solid rgba(249, 115, 22, 0.2);
+            border-radius: 8px; display: flex; align-items: center; justify-content: center;
+            color: var(--neon-amber); font-size: 16px; margin-bottom: 20px; font-weight: 700;
+        }
+
+        .gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; margin-top: 20px; }
+        .gallery img { width: 100%; height: 240px; object-fit: cover; border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.04); }
+
+        .contact-form { display: grid; gap: 20px; max-width: 600px; margin: 0 auto; }
+        .contact-form input, .contact-form textarea {
+            padding: 16px; border: none; border-radius: 12px; background: var(--bg-panel);
+            color: white; border: 1px solid rgba(255, 255, 255, 0.06); width: 100%; font-family: 'Inter', sans-serif; outline: none;
+        }
+        .contact-form input:focus, .contact-form textarea:focus { border-color: var(--neon-amber); }
+
+        .btn {
+            padding: 14px 36px; border: none; border-radius: 50px; cursor: pointer; font-weight: 700;
+            text-decoration: none; display: inline-block; font-size: 13px; text-align: center;
+            background: linear-gradient(90deg, var(--neon-amber), var(--neon-glow)); color: #0b0c10;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(249, 115, 22, 0.25); }
+
+        .btn-alt {
+            background: transparent;
+            border: 1px solid rgba(249, 115, 22, 0.4);
+            color: white;
+            padding: 14px 36px;
+            border-radius: 50px;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 13px;
+            font-weight: 700;
+            transition: 0.2s ease;
+        }
+        .btn-alt:hover {
+            border-color: var(--neon-amber);
+            background: rgba(249, 115, 22, 0.05);
+            color: var(--neon-amber);
+        }
+
+        .whatsapp { position: fixed; bottom: 25px; left: 25px; background: #25D366; color: white; padding: 14px 24px; border-radius: 50px; text-decoration: none; font-weight: bold; z-index: 999; box-shadow: 0 10px 25px rgba(37, 211, 102, 0.2); font-size: 13px; }
+        footer { padding: 40px 20px; text-align: center; color: #64748b; font-size: 13px; border-top: 1px solid rgba(255, 255, 255, 0.05); background: #020205; }
+        .fade { opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease, transform 0.6s ease; }
+        .fade.show { opacity: 1; transform: translateY(0); }
+    </style>
+</head>
+
+<body>
+
+    <canvas id="bg"></canvas>
+
+    <a href="https://wa.me/91911027364" class="whatsapp" target="_blank" rel="noopener noreferrer">💬 Commercial Consultation Line</a>
+
+    <nav>
+        <div class="logo">
+            <div class="logo-emblem">BNL</div>
+            <div>
+                <h1>BUILD<span>NEX</span> LABS</h1>
+                <p>Engineering & B2B Automation Solutions</p>
+            </div>
+        </div>
+        <div class="nav-links">
+            <a href="#about">Foundations</a>
+            <a href="#home-automation">Home Automation</a>
+            <a href="#building-automation">Building BMS</a>
+            <a href="#projects">Active Projects</a>
+            <a href="#embedded-testing">Integration Testing</a>
+            <a href="#academic">Academic Repos</a>
+            <a href="#services">Our Services</a>
+            <a href="./labs.html" class="nav-btn-highlight">Launch Lab Hub 🛠️</a>
+        </div>
+    </nav>
+
+    <div class="hero">
+        <div class="hero-layout">
+            <div class="hero-content">
+                <div class="hero-tag">Registered Corporate Engineering Entity</div>
+                <h2>Industrial Design Automation, Smart <span>Home & Building BMS</span> Architecture.</h2>
+                <div class="hero-desc">
+                    BuildNex Labs functions as an engineering provider delivering embedded micro-firmware, edge intelligence, low-voltage control loops, and comprehensive GST-compliant contracting blueprints.
+                </div>
+                <div class="hero-action-buttons">
+                    <a href="./labs.html" class="btn">Launch Innovation Hub</a>
+                    <a href="#contact" class="btn-alt">Initiate Project Consultation</a>
+                </div>
+            </div>
+            <div class="hardware-stage">
+                <div class="pcb-board">
+                    <div class="mcu-silicon">DDC CORE</div>
+                    <div class="trace-lines"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <section class="fade" id="about">
+        <div class="section-header">
+            <h2 class="section-title">Corporate Foundations</h2>
+            <p class="section-subtitle">Firm Directives & Execution Models</p>
+        </div>
+        <div class="grid">
+            <div class="card">
+                <h3>Who We Are</h3>
+                <p>BuildNex Labs is a specialized deep-tech engineering partner providing edge system prototyping, automation mapping, and professional implementation handling for residential, commercial, and research sectors.</p>
+            </div>
+            <div class="card">
+                <h3>B2B Operations</h3>
+                <p>Operating under an independent registered Sole Proprietorship enterprise layout with verified business current accounts and active GST validation parameters to process corporate vendor onboarding loops smoothly.</p>
+            </div>
+            <div class="card">
+                <h3>Engineering Quality</h3>
+                <p>We eliminate development friction by pairing rugged, optocoupled hardware layouts with professional schematic logging and strict mathematical system validation tracks.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="fade" id="home-automation" style="background: rgba(255,255,255,0.01)">
+        <div class="section-header">
+            <h2 class="section-title">Advanced Home Automation</h2>
+            <p class="section-subtitle">What We Do & How It Is Operationalized</p>
+        </div>
+        <div class="grid">
+            <div class="card">
+                <h3>The Wireless Mesh Paradigm</h3>
+                <p>We transition residential properties away from unstable, high-draw standalone Wi-Fi switches to low-power, high-availability wireless configurations that function locally without cloud dependencies.</p>
+                <ul class="info-list">
+                    <li><strong>Zigbee Routing Mesh:</strong> Mains-powered switches act as physical network routers, creating a self-healing mesh architecture that expands wireless range safely.</li>
+                    <li><strong>Z-Wave Sub-GHz Transmissions:</strong> Operates strictly outside the crowded $2.4\text{GHz}$ frequency spectrum, passing through heavy interior structures without signal loss.</li>
+                </ul>
+                <span class="badge">IEEE 802.15.4 Mesh Network Architecture</span>
+            </div>
+
+            <div class="card">
+                <h3>Decentralized Local Control</h3>
+                <p>We integrate hardware platforms using centralized, on-premise operating systems that prioritize user privacy, data security, and sub-millisecond execution speeds.</p>
+                <ul class="info-list">
+                    <li><strong>Home Assistant Ingestion:</strong> Local execution hubs that bridge multiple smart appliance brands into a single secure interface block.</li>
+                    <li><strong>Lightweight MQTT Transport:</strong> Edge microcontrollers publish light state variables and climate parameters instantly over non-blocking message broker channels.</li>
+                </ul>
+                <span class="badge">Local Processing Hubs (No Cloud Dependency)</span>
+            </div>
+
+            <div class="card">
+                <h3>Smart BMS Energy Management</h3>
+                <p>We build smart battery management systems directly into solar storage arrays, giving homeowners transparent metrics down to individual cell voltage states.</p>
+                <ul class="info-list">
+                    <li><strong>Cell Balancing Integration:</strong> Microcontroller bridges read raw serial UART lines to evaluate state-of-charge tracking configurations dynamically.</li>
+                    <li><strong>Safety Matrix Telemetry:</strong> Systems watch thermal profiles and isolate load circuits instantly if current boundaries are breached.</li>
+                </ul>
+                <span class="badge">LiFePO4 Power Protection Arrays</span>
+            </div>
+        </div>
+    </section>
+
+    <section class="fade" id="building-automation">
+        <div class="section-header">
+            <h2>Industrial Building Automation (BAS/BMS)</h2>
+            <p class="section-subtitle">Enterprise HVAC Mechanical Control Loops & Operations</p>
+        </div>
+        <div class="grid">
+            <div class="card">
+                <h3>The 3-Tier Building Topology</h3>
+                <p>We design open-protocol facilities layouts configured across three strictly managed industry levels to supervise mechanical plant assets efficiently.</p>
+                <ul class="info-list">
+                    <li><strong>Field Level:</strong> Duct sensors, thermal probes, flow transducers, and motorized damper valve actuators collecting variables directly.</li>
+                    <li><strong>Control Level:</strong> Direct Digital Control (DDC) processors running local deterministic calculation matrices to maintain facility balance parameters.</li>
+                    <li><strong>Management SCADA Level:</strong> Centralized dashboard engines that pull real-time analytics and log systemic tracking registries long-term.</li>
+                </ul>
+                <span class="badge">Enterprise Facility Architecture Specifications</span>
+            </div>
+
+            <div class="card">
+                <h3>Industrial Network Protocols</h3>
+                <p>We drop arbitrary custom data packets and map all automated instrumentation points strictly over standardized open industrial bus frameworks.</p>
+                <ul class="info-list">
+                    <li><strong>BACnet/IP Objects:</strong> Treats mechanical hardware parameters as distinct network items with readable Present_Value variables over standard UDP layers.</li>
+                    <li><strong>Modbus RTU Register Tracing:</strong> Binary polling loops that read and write variables directly across 16-bit Input and Holding register maps.</li>
+                </ul>
+                <span class="badge">Standardized Protocol Interfacing</span>
+            </div>
+
+            <div class="card">
+                <h3>Closed-Loop PID Control Logic</h3>
+                <p>We eliminate standard erratic `on/off` clicking cycles that prematurely damage industrial air handling plants and chilled water lines by implementing smooth Proportional loops.</p>
+                <ul class="info-list">
+                    <li><strong>Error Variable Monitoring:</strong> Continuous loop tracing checks exactly how far space temperatures stray from setpoint targets.</li>
+                    <li><strong>Proportional Actuation:</strong> Smoothly recalculates output voltage commands to open chilled water valve servos proportionally to the cooling load demand.</li>
+                </ul>
+                <span class="badge">Proportional-Integral-Derivative Calculations</span>
+            </div>
+        </div>
+    </section>
+
+    <section class="fade" id="projects" style="background: rgba(255,255,255,0.01)">
+        <div class="section-header">
+            <h2>Active Laboratory Project Registries</h2>
+            <p class="section-subtitle">Verified Prototype Architectures & Hackathon Blueprints</p>
+        </div>
+        <div class="grid">
+            <div class="card">
+                <h3>🧠 Mind-Controlled BCI Prosthetic Arm</h3>
+                <p>An advanced, non-invasive bio-cybernetic prosthetic system designed for affordable physical rehabilitation tracking. Maps scalp-level neural metrics directly onto responsive kinematic motor matrices.</p>
+                <ul class="info-list">
+                    <li><strong>EEG Spatial Filtering:</strong> Collects raw neuro-potential streams, filtering out ambient $50\text{Hz}$ mains noise through optimized notch arrays.</li>
+                    <li><strong>PWM Control Mapping:</strong> Translates down-sampled motor imagery frequency spikes directly into smooth multi-axis servo angle coordinates.</li>
+                </ul>
+                <span class="badge">BCI Signal Fusion Stack</span>
+            </div>
+
+            <div class="card">
+                <h3>🫀 Multimodal Epilepsy Seizure Wearable</h3>
+                <p>A continuous high-fidelity medical signal monitoring node built to capture and classify rapid baseline biological variances. Uses localized edge routines to run independent of remote network bridges.</p>
+                <ul class="info-list">
+                    <li><strong>Biometric Ingestion:</strong> Coordinates high-speed I2C polling across MAX30102 pulse oximetry chips and ADXL335 triple-axis analog accelerometers.</li>
+                    <li><strong>Deterministic Filtering:</strong> Runs on-chip floating-point averages to isolate metric spikes, immediately generating local emergency alerts.</li>
+                </ul>
+                <span class="badge">Edge Telemetry Matrix</span>
+            </div>
+
+            <div class="card">
+                <h3>✋ Osteoporosis Smart Diagnostic Glove</h3>
+                <p>An assistive wearable array designed to measure joint load constraints and muscular tremors natively. Custom flex tracking loops map kinematic structural boundaries accurately.</p>
+                <ul class="info-list">
+                    <li><strong>Kinematic Data Fields:</strong> Reads analog resistances across flexible knuckle substrates to calculate localized stress vectors.</li>
+                    <li><strong>MSME Hackathon MVP:</strong> Validated system prototype shortlisted for municipal micro-enterprise manufacturing sponsorship.</li>
+                </ul>
+                <span class="badge">Kinematic Assistive Array</span>
+            </div>
+
+            <div class="card">
+                <h3>🎞️ Python AI Video Summarizer App</h3>
+                <p>A full-stack software application built for rapid content digestion. Uses cloud token parsing engines to map timestamped audio tracks into structured technical synopses.</p>
+                <ul class="info-list">
+                    <li><strong>Audio Vector Extraction:</strong> Extracts local multimedia frames, routing compressed streams to deep lexical evaluation buffers.</li>
+                    <li><strong>Memory Agent Pipeline:</strong> Formats segmented text vectors using multi-tier context strings to output clean Markdown scripts.</li>
+                </ul>
+                <span class="badge">Asynchronous Software Node</span>
+            </div>
+
+            <div class="card">
+                <h3>🗣️ Voice Assistant AI (ElevenLabs Engine)</h3>
+                <p>An intelligent voice companion designed for low-latency natural language processing loops. Uses modern streaming buffers to enable responsive workbench automation commands.</p>
+                <ul class="info-list">
+                    <li><strong>Vocal Synthesis Pipeline:</strong> Combines real-time speech tokenization layers with custom voice models for natural inflection handling.</li>
+                    <li><strong>Peripheral Node Triggering:</strong> Converts verbal intent into direct digital script execution flags to control workshop machinery.</li>
+                </ul>
+                <span class="badge">Vocal Automation Link</span>
+            </div>
+
+            <div class="card">
+                <h3>🦅 Aerodynamic Ornithopter Flight Core</h3>
+                <p>An advanced biological-mimicry flight platform built to study flapping-wing mechanics. Flight data metrics are mapped strictly within specialized mathematical publishing templates.</p>
+                <ul class="info-list">
+                    <li><strong>Mechanical Kinematics:</strong> Coordinates high-frequency lift links using precise gear reductions driven by micro-brushless motors.</li>
+                    <li><strong>LaTeX Document Structure:</strong> System testing bounds are compiled strictly within academic IEEE double-column conference layouts.</li>
+                </ul>
+                <span class="badge">Biological Mimicry Research</span>
+            </div>
+        </div>
+    </section>
+
+    <section class="fade" id="embedded-testing">
+        <div class="section-header">
+            <h2>Embedded Integration & Hardware Testing Matrix</h2>
+            <p class="section-subtitle">Rigorous Verification Protocols, Signal Ingestion, & System Auditing</p>
+        </div>
+        <div class="grid">
+            <div class="card">
+                <h3>🛡️ Hardware-in-the-Loop (HIL) Integration</h3>
+                <p>We deploy rigorous integration strategies to test compiled firmware logic safely against simulated real-world loads, avoiding peripheral component strain during initial diagnostics.</p>
+                <ul class="info-list">
+                    <li><strong>Sub-System Interface Verifications:</strong> Auditing physical bus boundary interactions between microcontrollers and peripherals before mounting them onto centralized multi-layer PCB boards.</li>
+                    <li><strong>Boundary Constraint Analysis:</strong> Validating that inputs do not flood internal buffers, preventing logic halts during multi-protocol executions.</li>
+                </ul>
+                <span class="badge">System-Level Co-Simulation Verification</span>
+            </div>
+
+            <div class="card">
+                <h3>⚡ Bus Signal Integrity & Oscilloscope Analysis</h3>
+                <p>Isolating signal noise anomalies across synchronous communication lines using hardware-level logic analytics tools before deployment to high-interference industrial plant floors.</p>
+                <ul class="info-list">
+                    <li><strong>Clock-Line Timing Audits:</strong> Measuring rise times, fall times, and electrical transients on $I^2C$ ($SDA/SCL$) and $SPI$ lines to ensure clean register transmission.</li>
+                    <li><strong>Optocoupled Protocol Isolation:</strong> Integrating physical noise isolation modules over RS-485 interfaces to buffer internal computing arrays from high inductive voltage spikes.</li>
+                </ul>
+                <span class="badge">Time-Domain Low-Level Signal Verification</span>
+            </div>
+
+            <div class="card">
+                <h3>📊 Firmware Regression & Diagnostic Testing</h3>
+                <p>Running long-term, non-blocking execution tests on micro-code kernels to ensure firmware stability, trace accurate memory heap usage, and avoid runtime errors.</p>
+                <ul class="info-list">
+                    <li><strong>Interrupt Service Routine Testing:</strong> Verifying microsecond execution targets across hardware timer routines, ensuring critical tasks take priority.</li>
+                    <li><strong>Data Corruption Verification:</strong> Auditing that asynchronous flash memory writes onto local EEPROM chips do not corrupt baseline configuration parameters during sudden power losses.</li>
+                </ul>
+                <span class="badge">Deterministic Bare-Metal Verification</span>
+            </div>
+        </div>
+    </section>
+
+    <section class="fade" id="academic" style="background: rgba(255,255,255,0.01)">
+        <div class="section-header">
+            <h2>Multi-Year Academic Engineering Tiers</h2>
+            <p class="section-subtitle">Tailored Project Support Maps From 1st to 4th Year Undergraduates</p>
+        </div>
+        <div class="grid">
+            <div class="card">
+                <h3>🌱 1st & 2nd Year: Fundamental Architecture</h3>
+                <p>Guiding early undergraduate teams through core engineering principles, structured breadboard wiring, basic algorithm construction, and circuit design practices.</p>
+                <ul class="info-list">
+                    <li><strong>Hardware Mastery:</strong> Transitioning cleanly from basic digital logic gates to 8-bit microcontroller boards (Arduino R3 platform).</li>
+                    <li><strong>Firmware Foundations:</strong> Writing crisp, non-blocking code strings utilizing basic sensor inputs like ultrasonic arrays and thermistors.</li>
+                    <li><strong>Target Deliverables:</strong> Low-cost obstacle-avoidance vehicles, automated plant irrigation nodes, and simple digital security locks.</li>
+                </ul>
+                <span class="badge">Base Micro-Firmware Engineering</span>
+            </div>
+
+            <div class="card">
+                <h3>🚀 3rd Year: Intermediate IoT & Embedded Mesh</h3>
+                <p>Elevating student groups into multi-device network configurations, wireless sensor fusion blocks, and responsive data streaming pipelines.</p>
+                <ul class="info-list">
+                    <li><strong>Wireless Protocols:</strong> Building data networks across low-power RF links, local Wi-Fi webs, and standalone Zigbee mesh layers.</li>
+                    <li><strong>Cloud Broker Integration:</strong> Connecting edge nodes to local database storage hubs using lightweight MQTT serialization strings.</li>
+                    <li><strong>Target Deliverables:</strong> Distributed environmental tracking stations, biometric access nodes, and smart energy tracking plugs.</li>
+                </ul>
+                <span class="badge">Wireless Mesh Processing Networks</span>
+            </div>
+
+            <div class="card">
+                <h3>🎓 4th Year: Capstone Thesis & Defense Systems</h3>
+                <p>Architecting final-year implementations configured to pass strict institutional committee reviews and peer-reviewed publishing panels.</p>
+                <ul class="info-list">
+                    <li><strong>Production Engineering:</strong> Compiling multi-layer optocoupled PCB designs, handling high-speed data streams, and configuring on-node TinyML execution arrays.</li>
+                    <li><strong>Defense Documentation:</strong> Full-scale drafting assistance across structured LaTeX indices, engineering bills of materials (BOM), and thesis glossaries.</li>
+                    <li><strong>Target Deliverables:</strong> Advanced BCI systems, standalone industrial automation nodes, and complete medical monitoring setups.</li>
+                </ul>
+                <span class="badge">Full-Scale Thesis Architecture</span>
+            </div>
+        </div>
+    </section>
+
+    <section class="fade" id="services">
+        <div class="section-header">
+            <h2>Our Core Competencies</h2>
+            <p class="section-subtitle">What We Deliver To Your Venture</p>
+        </div>
+        <div class="grid">
+            <div class="card">
+                <div class="service-icon">01</div>
+                <h3>Product Development & Prototyping</h3>
+                <p>We transform initial physical concepts into rugged minimal viable products (MVPs), managing everything from multi-layer PCB routing layout verifications to complete assembly modeling sweeps.</p>
+            </div>
+            <div class="card">
+                <div class="service-icon">02</div>
+                <h3>Low-Latency Embedded Firmware</h3>
+                <p>Writing precise, non-blocking bare-metal C++ firmware code blocks optimized for fast register allocations and smooth hardware pin interrupt execution tasks.</p>
+            </div>
+            <div class="card">
+                <div class="service-icon">03</div>
+                <h3>Signal Conditioning & Telemetry</h3>
+                <p>Deploying digital filters right on edge microcontroller nodes to isolate sensor signal variance, eliminate high-frequency bus noise, and stream data smoothly over local data links.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="fade">
+        <div class="section-header">
+            <h2>Project Galleries</h2>
+            <p class="section-subtitle">Real-World Lab Deployments & Photographic Logs</p>
+        </div>
+        <div class="gallery">
+            <img src="https://images.unsplash.com/photo-1563770660941-20978e870e26?auto=format&fit=crop&w=600&q=80" alt="Hardware Prototyping Cleanroom Bench">
+            <img src="https://images.unsplash.com/photo-1531746790731-6c087fecd65a?auto=format&fit=crop&w=600&q=80" alt="Deep Neural Networks Machine Learning Monitor">
+            <img src="https://images.unsplash.com/photo-1504639725590-34d0984388bd?auto=format&fit=crop&w=600&q=80" alt="Microelectronics Diagnostics Workspace">
+        </div>
+    </section>
+
+    <section class="fade" id="contact">
+        <div class="section-header" style="text-align: center; border-left: none; padding-left: 0;">
+            <h2>Initiate System Integration</h2>
+            <p class="section-subtitle">Secure Corporate Requirements Transmission Pipeline</p>
+        </div>
+        <form class="contact-form" action="https://formspree.io/f/lakshmanr1525@gmail.com" method="POST">
+            <input type="text" name="Client_Identity" placeholder="Your Name / Academic or Corporate Institution Name" required>
+            <input type="email" name="_replyto" placeholder="Official Business Contact Email Address" required>
+            <input type="text" name="Project_Specification_Title" placeholder="Target Integration Track (e.g., Home Automation Mesh / Chilled Water Loop Node)">
+            <textarea name="Hardware_Constraints_Specification" placeholder="Outline your comprehensive hardware parameters, microprocessing performance targets, or requested LaTeX document tracking metrics..." required></textarea>
+            <button type="submit" class="btn">Transmit Project Parameters</button>
+        </form>
+    </section>
+
+    <footer>
+        © 2026 BuildNex Labs — Engineering Next-Generation Intelligent Products. Built by Lakshman. All Rights Reserved.
+    </footer>
+
+    <div class="chatbot" id="buildnexChatbot">
+        <div class="chat-header">
+            <span>🤖 BuildNex AI Assistant Shell</span>
+            <span class="close-chat" id="closeChatBtn">&times;</span>
+        </div>
+        <div class="chat-body" id="chatBody">
+            <p><strong>System Terminal:</strong> Operational matrix running baseline parameters. Ingesting raw project requirements, pin assignments, or embedded filter code logic parameters.</p>
+        </div>
+        <div class="chat-input">
+            <input type="text" id="userInput" placeholder="Ask about ESP32 Core maps, Modbus logic, BCI systems..." onkeydown="if(event.key === 'Enter') sendMessage()">
+            <button onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+    <div class="chat-toggle" id="toggleChatBtn">💬</div>
+
+    <script>
+        /* ==========================================================================
+           1. ASYNC FLOATING RE-WIRED DIALOG SYSTEM INTERACTION CHANNELS
+           ========================================================================== */
+        async function sendMessage() {
+            let input = document.getElementById("userInput"); let msg = input.value.trim(); if (msg === "") return;
+            chatBody.innerHTML += `<p style="margin-top: 10px; text-align: right; color: #bae6fd;"><strong>You:</strong> ${msg}</p>`;
+            let pId = "msg-" + Date.now();
+            chatBody.innerHTML += `<p id="${pId}" style="color: #64748b; margin-top: 6px; font-style: italic;"><strong>AI:</strong> Processing channels...</p>`;
+            chatBody.scrollTop = chatBody.scrollHeight; input.value = "";
+
+            try {
+                const response = await fetch('http://127.0.0.1:8000/api/v1/chat/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt: msg, session_context: "BuildNex_Lab_Engine" })
+                });
+                const data = await response.json();
+                document.getElementById(pId).innerHTML = `<strong>AI:</strong> ${data.response_payload}`;
+            } catch (error) {
+                let reply = "Query parsed via offline memory token array configurations. Launch local main.py file gateway loop to wire direct communication links.";
+                let lowerStr = msg.toLowerCase();
+                if (lowerStr.includes("bms") || lowerStr.includes("modbus") || lowerStr.includes("battery")) {
+                    reply = "Smart BMS Integration Trace: Ensure your microcontroller gateway opens a secure serial connection to the battery board's TX/RX nodes using a proper logic converter to cleanly step down voltage spikes and isolate signal paths.";
+                } else if (lowerStr.includes("pid") || lowerStr.includes("hvac") || lowerStr.includes("valve")) {
+                    reply = "HVAC P-Loop Calculation Vector: To maintain a perfectly stable facility temperature, calculate the error variation ($Error = Current - Setpoint$) and smoothly open your cooling valve servo proportionally to that delta multiplier.";
+                } else if (lowerStr.includes("test") || lowerStr.includes("hil") || lowerStr.includes("verify")) {
+                    reply = "Embedded Testing Insight: Implement strict hardware-in-the-loop (HIL) isolation boundaries during test vectors to check firmware execution values securely without subjecting real mechanical peripherals to early overload stress frames.";
+                }
+                document.getElementById(pId).innerHTML = `<strong>AI:</strong> ${reply}`;
+            }
+            document.getElementById(pId).removeAttribute("id");
+            chatBody.scrollTop = chatBody.scrollHeight;
+        }
+
+        /* ==========================================================================
+           2. CONTINUOUS PARTICLE GRAPH ENGINE BACKGROUND LAYER
+           ========================================================================== */
+        const canvasBg = document.getElementById("bg"); const ctxBg = canvasBg.getContext("2d"); let dots = [];
+        function resizeCanvasElement() {
+            canvasBg.width = window.innerWidth; canvasBg.height = window.innerHeight; dots = [];
+            for (let i = 0; i < 65; i++) {
+                dots.push({ x: Math.random() * canvasBg.width, y: Math.random() * canvasBg.height, vx: (Math.random() - 0.5) * 0.35, vy: (Math.random() - 0.5) * 0.35 });
+            }
+        }
+        function animateIndustrialBackgroundMesh() {
+            ctxBg.clearRect(0, 0, canvasBg.width, canvasBg.height);
+            dots.forEach(d => {
+                d.x += d.vx; d.y += d.vy; ctxBg.fillStyle = "rgba(249, 115, 22, 0.15)"; ctxBg.fillRect(d.x, d.y, 2, 2);
+                dots.forEach(m => {
+                    let distance = Math.sqrt((d.x - m.x)**2 + (d.y - m.y)**2);
+                    if (distance < 130) {
+                        ctxBg.strokeStyle = `rgba(249, 115, 22, ${0.08 * (1 - distance / 130)})`;
+                        ctxBg.beginPath(); ctxBg.moveTo(d.x, d.y); ctxBg.lineTo(m.x, m.y); ctxBg.stroke();
+                    }
+                });
+                if (d.x < 0 || d.x > canvasBg.width) d.vx *= -1; if (d.y < 0 || d.y > canvasBg.height) d.my *= -1;
+            });
+            requestAnimationFrame(animateIndustrialBackgroundMesh);
+        }
+
+        window.addEventListener('resize', resizeCanvasElement);
+        window.addEventListener('DOMContentLoaded', () => {
+            resizeCanvasElement(); animateIndustrialBackgroundMesh();
+            
+            const chat = document.getElementById("buildnexChatbot");
+            document.getElementById("toggleChatBtn").addEventListener("click", () => { chat.style.display = "flex"; document.getElementById("toggleChatBtn").style.display = "none"; });
+            document.getElementById("closeChatBtn").addEventListener("click", () => { chat.style.display = "none"; document.getElementById("toggleChatBtn").style.display = "flex"; });
+
+            const fadeElements = document.querySelectorAll(".fade");
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add("show"); });
+            }, { threshold: 0.05 });
+            fadeElements.forEach(el => observer.observe(el));
+        });
+    </script>
+</body>
+
+</html>
